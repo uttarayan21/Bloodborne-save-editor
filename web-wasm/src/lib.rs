@@ -9,7 +9,7 @@ use bb_core::data_handling::{
     save::SaveData,
     upgrades::Upgrade,
 };
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use wasm_bindgen::prelude::*;
 
@@ -44,7 +44,10 @@ fn with_save<R>(f: impl FnOnce(&mut SaveData) -> R) -> Result<R, JsValue> {
 }
 
 fn to_js<T: serde::Serialize>(val: &T) -> Result<JsValue, JsValue> {
-    serde_wasm_bindgen::to_value(val).map_err(|e| JsValue::from_str(&e.to_string()))
+    // Use the JSON-compatible serializer so HashMap → plain object, enum
+    // unit variants → string, etc. — matching what Tauri's IPC produces.
+    let ser = serde_wasm_bindgen::Serializer::json_compatible();
+    val.serialize(&ser).map_err(|e| JsValue::from_str(&e.to_string()))
 }
 
 fn from_js<T: for<'de> Deserialize<'de>>(args: &JsValue, key: &str) -> Result<T, JsValue> {
