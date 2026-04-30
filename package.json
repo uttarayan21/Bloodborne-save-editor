@@ -20,14 +20,21 @@
   },
   "scripts": {
     "dev": "npm run tauri dev",
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "tauri": "tauri"
+    "start": "craco start",
+    "build": "craco build",
+    "tauri": "tauri",
+    "wasm:build": "wasm-pack build web-wasm --target web --out-dir ../src/wasm/pkg --release",
+    "web:dev": "cross-env WEB=1 craco start",
+    "web:build": "cross-env WEB=1 craco build",
+    "web": "npm run wasm:build && npm run web:dev"
   },
   "eslintConfig": {
     "extends": [
       "react-app",
       "react-app/jest"
+    ],
+    "ignorePatterns": [
+      "src/wasm/pkg/**"
     ]
   },
   "browserslist": {
@@ -43,6 +50,7 @@
     ]
   },
   "devDependencies": {
+    "@craco/craco": "^7.1.0",
     "@tauri-apps/api": "^2.8.0",
     "@tauri-apps/cli": "^2.8.4",
     "cross-env": "^7.0.3"

@@ -5,12 +5,11 @@ use std::{
 };
 
 pub fn export(file_data: &FileData, path: &str) -> Result<(), Error> {
-    let mut export_bytes = Vec::new();
-    export_bytes.extend_from_slice(
-        &file_data.bytes[file_data.offsets.appearance.0..=file_data.offsets.appearance.1],
-    );
+    fs::write(path, &export_bytes(file_data)).map_err(Error::IoError)
+}
 
-    fs::write(path, &export_bytes).map_err(Error::IoError)
+pub fn export_bytes(file_data: &FileData) -> Vec<u8> {
+    file_data.bytes[file_data.offsets.appearance.0..=file_data.offsets.appearance.1].to_vec()
 }
 
 pub fn import(file_data: &mut FileData, path: &str) -> Result<(), Error> {
@@ -19,6 +18,10 @@ pub fn import(file_data: &mut FileData, path: &str) -> Result<(), Error> {
     let mut bytes = Vec::new();
 
     file.read_to_end(&mut bytes).map_err(Error::IoError)?;
+    import_bytes(file_data, &bytes)
+}
+
+pub fn import_bytes(file_data: &mut FileData, bytes: &[u8]) -> Result<(), Error> {
     if bytes.len() != 0xEB {
         return Err(Error::CustomError("Not correct size"));
     }
@@ -26,7 +29,6 @@ pub fn import(file_data: &mut FileData, path: &str) -> Result<(), Error> {
     for i in start.0..=start.1 {
         file_data.bytes[i] = bytes[i - start.0];
     }
-
     Ok(())
 }
 

@@ -30,7 +30,16 @@ pub struct SaveData {
 
 impl SaveData {
     pub fn build(save_path: &str, resources_path: PathBuf) -> Result<SaveData, Error> {
-        let mut file = FileData::build(save_path, resources_path)?;
+        let file = FileData::build(save_path, resources_path)?;
+        Self::from_file_data(file)
+    }
+
+    pub fn build_from_bytes(bytes: Vec<u8>, resources_path: PathBuf) -> Result<SaveData, Error> {
+        let file = FileData::build_from_bytes(bytes, resources_path)?;
+        Self::from_file_data(file)
+    }
+
+    fn from_file_data(mut file: FileData) -> Result<SaveData, Error> {
         let stats = stats::new(&file).unwrap();
         let bosses = bosses::new(&file).unwrap();
         let mut upgrades = parse_upgrades(&file);

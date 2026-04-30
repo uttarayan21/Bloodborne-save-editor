@@ -2,7 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::{error::Error, fs::File, io::BufReader, sync::Mutex};
-mod data_handling;
+use bb_core::data_handling;
 
 use data_handling::{
     appearance,

@@ -45,6 +45,18 @@ impl FileData {
         })
     }
 
+    pub fn build_from_bytes(bytes: Vec<u8>, resources_path: PathBuf) -> Result<FileData, Error> {
+        if bytes.is_empty() {
+            return Err(Error::CustomError("The selected file is empty."));
+        }
+        let offsets = Offsets::build(&bytes)?;
+        Ok(FileData {
+            bytes,
+            offsets,
+            resources_path,
+        })
+    }
+
     //offset_from_username is value_offset-username_offset
     pub fn get_number(&self, offset_from_username: isize, length: usize) -> u32 {
         let value_offset = (self.offsets.username as isize + offset_from_username) as usize;
