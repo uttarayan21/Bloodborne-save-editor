@@ -65,10 +65,18 @@ pub fn invoke(cmd: &str, args: JsValue) -> Result<JsValue, JsValue> {
     match cmd {
         "make_save" => {
             let bytes: Vec<u8> = from_js(&args, "bytes")?;
+            let len = bytes.len();
+            web_sys::console::log_1(&JsValue::from_str(&format!(
+                "make_save: received {} bytes",
+                len
+            )));
             let save = SaveData::build_from_bytes(bytes, PathBuf::new())
-                .map_err(|_| JsValue::from_str(
-                    "Failed to load file, make sure its a decrypted character.",
-                ))?;
+                .map_err(|e| {
+                    JsValue::from_str(&format!(
+                        "Failed to load save ({} bytes): {}",
+                        len, e
+                    ))
+                })?;
             let val = to_js(&save)?;
             SAVE.with(|s| *s.borrow_mut() = Some(save));
             Ok(val)

@@ -30,4 +30,5 @@ build/
 src-tauri/vendor
 flatpak
 repo
-*.flatpak
+*.flatpak.direnv
+/.direnv

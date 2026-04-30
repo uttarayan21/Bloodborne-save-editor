@@ -5,21 +5,28 @@ export async function open(_opts = {}) {
     const input = document.createElement("input");
     input.type = "file";
     input.style.display = "none";
+    const cleanup = () => {
+      if (input.parentNode) input.parentNode.removeChild(input);
+    };
     input.addEventListener("change", async () => {
       const f = input.files && input.files[0];
       if (!f) {
+        cleanup();
         resolve(null);
         return;
       }
       const buf = new Uint8Array(await f.arrayBuffer());
       const id = nextId("mem", f.name);
       fileStore.set(id, { name: f.name, bytes: buf });
+      cleanup();
       resolve(id);
     });
-    input.addEventListener("cancel", () => resolve(null));
+    input.addEventListener("cancel", () => {
+      cleanup();
+      resolve(null);
+    });
     document.body.appendChild(input);
     input.click();
-    input.remove();
   });
 }
 

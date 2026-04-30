@@ -24,8 +24,9 @@ function Nav({ setLoading, setSave, save }) {
       setName(await basename(selectedPath));
     } catch (error) {
       console.error(error);
+      const detail = typeof error === "string" ? error : error?.message || String(error);
       await dialog.message(
-        "Could not parse file, make sure it is a decrypted save file",
+        `Could not parse file, make sure it is a decrypted save file.\n\n${detail}`,
         {
           title: "Failed to parse save",
           kind: "error",
