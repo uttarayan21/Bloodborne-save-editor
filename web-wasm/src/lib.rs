@@ -5,6 +5,7 @@ use bb_core::data_handling::{
     appearance,
     article::Article,
     enums::{ArticleType, Location, SlotShape, UpgradeType},
+    resources,
     save::SaveData,
     upgrades::Upgrade,
 };
@@ -16,6 +17,17 @@ const WEAPONS_JSON: &str = include_str!("../../src-tauri/resources/weapons.json"
 const ARMORS_JSON: &str = include_str!("../../src-tauri/resources/armors.json");
 const ITEMS_JSON: &str = include_str!("../../src-tauri/resources/items.json");
 const UPGRADES_JSON: &str = include_str!("../../src-tauri/resources/upgrades.json");
+const OFFSETS_JSON: &str = include_str!("../../src-tauri/resources/offsets.json");
+const BOSSES_JSON: &str = include_str!("../../src-tauri/resources/bosses.json");
+
+const RESOURCES: &[(&str, &str)] = &[
+    ("weapons.json", WEAPONS_JSON),
+    ("armors.json", ARMORS_JSON),
+    ("items.json", ITEMS_JSON),
+    ("upgrades.json", UPGRADES_JSON),
+    ("offsets.json", OFFSETS_JSON),
+    ("bosses.json", BOSSES_JSON),
+];
 
 thread_local! {
     static SAVE: RefCell<Option<SaveData>> = const { RefCell::new(None) };
@@ -53,6 +65,7 @@ fn parse_json(name: &str, raw: &str) -> Result<Value, JsValue> {
 #[wasm_bindgen(start)]
 pub fn init() {
     console_error_panic_hook::set_once();
+    resources::register(RESOURCES);
 }
 
 #[wasm_bindgen(js_name = getVersion)]

@@ -1,8 +1,7 @@
 use serde::{Deserialize, Serialize};
 
-use super::file::FileData;
-use std::fs::File;
-use std::io::{self, BufReader};
+use super::{file::FileData, resources};
+use std::io;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct Stat {
@@ -22,17 +21,21 @@ impl Stat {
 }
 
 pub fn new(file: &FileData) -> Result<Vec<Stat>, io::Error> {
-    let file_path = file.resources_path.join("offsets.json");
-    let json_file = File::open(file_path)?;
-    let reader = BufReader::new(json_file);
+    let raw = resources::read(file, "offsets.json")?;
+    let stats: Vec<Stat> = serde_json::from_str(&raw)?;
+    Ok(populate(file, stats))
+}
 
-    // Read the JSON contents of the file as Vec<Stat>.
-    let mut stats: Vec<Stat> = serde_json::from_reader(reader)?;
+pub fn from_json(file: &FileData, json: &str) -> Result<Vec<Stat>, serde_json::Error> {
+    let stats: Vec<Stat> = serde_json::from_str(json)?;
+    Ok(populate(file, stats))
+}
+
+fn populate(file: &FileData, mut stats: Vec<Stat>) -> Vec<Stat> {
     for s in &mut stats {
         s.value = file.get_number(s.rel_offset, s.length);
     }
-
-    Ok(stats)
+    stats
 }
 
 #[cfg(test)]

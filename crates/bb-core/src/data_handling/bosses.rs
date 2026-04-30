@@ -1,7 +1,6 @@
-use super::file::FileData;
+use super::{file::FileData, resources};
 use serde::{Deserialize, Serialize};
-use std::fs::File;
-use std::io::{self, BufReader};
+use std::io;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct Flag {
@@ -18,17 +17,21 @@ pub struct Boss {
 }
 
 pub fn new(file: &FileData) -> Result<Vec<Boss>, io::Error> {
-    let file_path = file.resources_path.join("bosses.json");
-    let json_file = File::open(file_path)?;
-    let reader = BufReader::new(json_file);
+    let raw = resources::read(file, "bosses.json")?;
+    let bosses: Vec<Boss> = serde_json::from_str(&raw)?;
+    Ok(populate(file, bosses))
+}
 
-    // Read the JSON contents of the file as Vec<Stat>.
-    let mut bosses: Vec<Boss> = serde_json::from_reader(reader)?;
+pub fn from_json(file: &FileData, json: &str) -> Result<Vec<Boss>, serde_json::Error> {
+    let bosses: Vec<Boss> = serde_json::from_str(json)?;
+    Ok(populate(file, bosses))
+}
+
+fn populate(file: &FileData, mut bosses: Vec<Boss>) -> Vec<Boss> {
     for b in &mut bosses {
         for f in &mut b.flags {
             f.current_value = file.get_flag(f.rel_offset);
         }
     }
-
-    Ok(bosses)
+    bosses
 }

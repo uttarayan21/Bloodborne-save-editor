@@ -8,7 +8,7 @@ use super::{
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{self, json, Value};
-use std::{collections::HashMap, fs::File, io::BufReader, path::PathBuf};
+use std::{collections::HashMap, path::PathBuf};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Inventory {
@@ -648,10 +648,9 @@ impl Inventory {
 }
 
 pub fn get_info_item(id: u32, resources_path: &PathBuf) -> Result<(ItemInfo, ArticleType), Error> {
-    let file_path = resources_path.join("items.json");
-    let json_file = File::open(file_path).map_err(Error::IoError)?;
-    let reader = BufReader::new(json_file);
-    let items: Value = serde_json::from_reader(reader).unwrap();
+    let raw = super::resources::read_named(resources_path, "items.json")
+        .map_err(Error::IoError)?;
+    let items: Value = serde_json::from_str(&raw).unwrap();
     let items = items.as_object().unwrap();
 
     for (category, category_items) in items {
@@ -681,10 +680,9 @@ pub fn get_info_item(id: u32, resources_path: &PathBuf) -> Result<(ItemInfo, Art
 }
 
 pub fn get_info_armor(id: u32, resources_path: &PathBuf) -> Result<(ItemInfo, ArticleType), Error> {
-    let file_path = resources_path.join("armors.json");
-    let json_file = File::open(file_path).map_err(Error::IoError)?;
-    let reader = BufReader::new(json_file);
-    let armors: Value = serde_json::from_reader(reader).unwrap();
+    let raw = super::resources::read_named(resources_path, "armors.json")
+        .map_err(Error::IoError)?;
+    let armors: Value = serde_json::from_str(&raw).unwrap();
     let armors = armors.as_object().unwrap();
 
     match armors.keys().find(|x| x.parse::<u32>().unwrap() == id) {
@@ -709,10 +707,9 @@ pub fn get_info_weapon(
     mut id: u32,
     resources_path: &PathBuf,
 ) -> Result<(ItemInfo, ArticleType), Error> {
-    let file_path = resources_path.join("weapons.json");
-    let json_file = File::open(file_path).map_err(Error::IoError)?;
-    let reader = BufReader::new(json_file);
-    let weapons: Value = serde_json::from_reader(reader).unwrap();
+    let raw = super::resources::read_named(resources_path, "weapons.json")
+        .map_err(Error::IoError)?;
+    let weapons: Value = serde_json::from_str(&raw).unwrap();
     let weapons = weapons.as_object().unwrap();
 
     let weapon_mods = WeaponMods::try_from(id)?;

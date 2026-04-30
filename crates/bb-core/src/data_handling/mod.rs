@@ -7,6 +7,7 @@ pub mod file;
 pub mod inventory;
 pub mod offsets;
 pub mod position;
+pub mod resources;
 pub mod save;
 pub mod slots;
 pub mod stats;

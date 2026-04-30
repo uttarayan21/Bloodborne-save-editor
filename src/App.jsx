@@ -14,6 +14,10 @@ function App() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    const isTauri =
+      typeof window !== "undefined" && !!window.__TAURI_INTERNALS__;
+    if (!isTauri) return;
+
     async function checkUpdate() {
       try {
         const req = await fetch(
