@@ -98,9 +98,8 @@ pub fn invoke(cmd: &str, args: JsValue) -> Result<JsValue, JsValue> {
             Ok(val)
         }
         "save" => {
-            // Returns the bytes; JS handles download
-            with_save(|save| save.file.bytes.clone())
-                .and_then(|b| to_js(&b))
+            // Returns the bytes as a Uint8Array; JS handles download
+            with_save(|save| js_sys::Uint8Array::from(&save.file.bytes[..]).into())
         }
         "return_weapons" => to_js(&parse_json("weapons", WEAPONS_JSON)?),
         "return_armors" => to_js(&parse_json("armors", ARMORS_JSON)?),
@@ -260,8 +259,8 @@ pub fn invoke(cmd: &str, args: JsValue) -> Result<JsValue, JsValue> {
             })?
         }
         "export_appearance" => {
-            // Returns bytes; JS triggers download
-            with_save(|s| appearance::export_bytes(&s.file)).and_then(|b| to_js(&b))
+            // Returns bytes as Uint8Array; JS triggers download
+            with_save(|s| js_sys::Uint8Array::from(&appearance::export_bytes(&s.file)[..]).into())
         }
         "import_appearance" => {
             let bytes: Vec<u8> = from_js(&args, "bytes")?;
